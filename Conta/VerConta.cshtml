@@ -1,0 +1,574 @@
+@using TaticoWeb.Models
+@{
+    ViewBag.Title = "Conta de Movimentação";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section head {
+    <style>
+        .cash-in-modal-content {
+            width: 600px;
+            height: 395px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+          }
+          
+        .cash-out-modal-content {
+            width: 600px;
+            height: 418px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .cash-modal-feedback-content {
+            width: 600px;
+            height: 405px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+          
+        .cash-modal-dialog {
+            border-radius: 8px;
+            background: #FCFCFD;
+            box-shadow: 0px 16px 48px 0px rgba(0, 0, 0, 0.20);
+            border: none;
+        }
+          
+        .cash-modal-header {
+            padding: 24px;
+            border:  none;
+        }
+        
+        .cash-modal-header .close {
+            margin-top: 0;
+        }
+        
+        .cash-modal-header .close {
+            color: var(--primary-brand) !important;
+            opacity: 1;
+        }
+        
+        .cash-modal-header .modal-title {
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 600;
+            color:  #000A12;
+        }
+          
+        .cash-modal-body {
+            padding: 16px 64px;
+        }
+        
+        .cash-modal-footer {
+            padding: 24px;
+            border:  none;
+        }
+        
+        .feedback-modal-text {
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 600;
+            color: #000A12;
+        }
+        
+        .feedback-icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+        }
+        
+        .body-text-medium {
+            font-size: 14px;
+            font-style: normal;
+        }
+        
+        .body-text-small {
+            font-size: 12px;
+            font-style: normal;
+        }
+        
+        .label-text-medium {
+            font-size: 14px;
+            font-style: normal;
+        }
+        
+        .color-primary {
+            color: #001E35;
+        }
+        
+        .color-neutral-a {
+            color: var(--neutral-a);
+        }
+        
+        .color-neutral-b {
+            color: var(--neutral-b);
+        }
+        
+        .color-text-title {
+            color: #000A12;
+        }
+        
+        .color-success {
+            color: #43A063;
+        }
+        
+        .color-error {
+            color: #D22F0B;
+        }
+        
+        .text-align-center {
+            text-align: center;
+        }
+        
+        .weight-600 {
+            font-weight: 600;
+        }
+        
+        .weight-400 {
+            font-weight: 400;
+        }
+        
+        .outline-box {
+            display: flex;
+            flex-direction: row;
+            padding: 8px 16px;
+            align-items: flex-start;
+            gap: 16px;
+            align-self: stretch;
+            border-radius: 6px;
+            border: 1px solid #DCE4EA;
+            background: #F5F7F9;
+        }
+        
+        .outline-box > div {
+            width: 50%;
+        }
+        
+        .cash-input {
+            border-radius: 6px;
+            border: 1px solid #DCE4EA;
+            background: #FCFCFD;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            color:  #2A4357;
+            box-shadow: none;
+        }
+        
+        .cash-input::placeholder {
+            color: var(--neutral-d);
+        }
+        
+        .btn-success, .btn-success:hover, .btn-success:active, .btn-success:visited {
+            background-color: var(--primary-brand) !important;
+            border-color: var(--primary-brand) !important;
+            color: var(--highlight) !important;
+            box-shadow: none !important;
+            min-width: 140px;
+        }
+        .btn-success:hover {
+          opacity: 0.9;
+        }
+        .btn-success:focus {
+          opacity: 0.7;
+        }
+        .btn-success:active {
+            opacity: 1;
+        }
+        .btn-success:disabled {
+          opacity: 0.7;
+        }
+        .btn-everest-default-txt {
+            box-shadow: none !important;
+        }
+        .cash-modal-dialog .btn {
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 600;
+        }
+        
+        .cash-out-inputs-container {
+            display: flex;
+            flex-direction: row;
+            gap:  8px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .cash-out-inputs-container .arrow-right-container {
+            display: flex;
+            width: 24px;
+            padding-bottom: 9px;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            align-self: stretch;
+        }
+        
+        .info-container {
+            display: flex;
+            flex-direction: row;
+            gap:  8px;
+            align-items: center;
+            justify-content: start;
+        }
+        
+        /* Margem para baixo */
+        .margin-bottom-quark { margin-bottom: 4px; }
+        .margin-bottom-xxxs { margin-bottom: 16px; }
+        
+        /* Margem em todas as direções */
+        .margin-none { margin: 0 !important; }
+        
+        .margin-all-quark {
+            margin: 4px;
+        }
+    </style>
+}
+
+<div class="page-title">
+    <div class="title_full">
+        <div class="pull-right inline">
+            <div id="ajustarSaldoKamino" class="buttons btn-group">
+                <a class="btn btn-info" onclick="ContaCorrenteUtils.AjustarSaldoInicial(Filtros.IDPlanoContaAtivo, $('#titulo').text(), moment().startOf('day'), buscaExtratoBloqueio);" title="Ajustar saldo em uma data">Ajustar Saldo</a>
+            </div>
+            <div id="pagarCartao" class="buttons btn-group hidden">
+                <a class="btn btn-info" onclick="redirecionarTransferencia()" title="Pagar Cartão">Pagar Cartão</a>
+            </div>
+            <div id="cashOutButtonSection" class="buttons btn-group">
+                <a id="openRecoverBalanceButton" class="btn btn-default" data-toggle="modal" data-target="#modalCashOut">Resgatar</a>
+            </div>
+            <div id="cashInButtonSection" class="buttons btn-group">
+                <a id="openAddBalanceButton" class="btn btn-success" data-toggle="modal" data-target="#modalCashIn">Adicionar saldo</a>
+            </div>
+        </div>
+        <h3 id="titulo" class="inline-editing linkEntidade" data-allowEmpty="false" data-id="@ViewBag.IDConta" data-field="ID" data-entidade="ContaOrigem" data-type="select" data-editJSAction="atualizaConta"><i class="fa fa-spin fa-spinner"></i> Carregando...</h3>
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-9 col-md-12">
+        <div class="x_panel">
+            <div class="x_content">
+                <ul class="list-unstyled nav nav-pills">
+                    <li>
+                        <a id="periodoBusca" href="#" data-role="daterange" class="btn btn-default" data-apenasPassado="true" data-startDate="moment().startOf('week').startOf('day')" data-endDate="moment().endOf('week').startOf('day')" data-callback="mudaPeriodo">
+                            <span>Esta semana</span> <i class="fa fa-angle-down"></i>
+                        </a>
+                    </li>
+                    <li id="dropSearchType">
+                        <a id="dropTipoBusca" href="#" data-toggle="dropdown" class="btn btn-default dropdown-toggle" aria-expanded="false">
+                            <span id="tipoBusca">Busca por Caixa</span> <i class="fa fa-angle-down"></i>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>
+                                <a href="#" onclick="mudaTipo(1); return false;">Busca por Caixa</a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="mudaTipo(2); return false;">Busca por Competência</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li id="includeRateiosCheckbox">
+                        &nbsp;
+                        <label style="margin-top: 12px"><input type='checkbox' class="flat" name="IncluirRateio" id="checkIncluirRateio" value="true"/> Incluir Rateios</label>
+                    </li>
+                    <li class="pull-right" id="liRecarregar">
+                        <a href="#" class="btn btn-sm btn-default" title="Recalcula o saldo da conta desde a primeira movimentação realizada. Isso pode demorar um pouco." data-role="admin" style="display: none;" onclick="recarregarExtrato(); return false;">Recalcular Saldo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="x_panel">
+            <div class="x_content">
+                <div class="table-responsive">
+                    <table id="consulta" class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th style="width: 120px"></th>
+                            <th style="width: 200px">Classificação</th>
+                            <th>Descrição</th>
+                            <th style="width: 120px" class="text-right">Valor (R$)</th>
+                            <th style="width: 15px"></th>
+                            <th style="width: 50px"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td colspan="6">Selecione a conta acima para exibir a movimentação no período.</td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-12" id="colunaDireita">
+
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="modalCashIn" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog cash-modal-dialog">
+        <div class="modal-content cash-in-modal-content">
+            <div class="modal-header cash-modal-header">
+                <button id="closeModalCashIn" type="button" class="close" data-dismiss="modal">
+                    <i class="fa-solid fa-xmark-large"></i>
+                </button>
+                <h4 class="modal-title">Adicionar saldo</h4>
+            </div>
+            <div class="modal-body cash-modal-body">
+                <p class="color-neutral-a body-text-medium weight-400 margin-bottom-xxxs">Esta ação transfere o valor abaixo, para a conta garantia, da seguinte conta:</p>
+                <div>
+                    <div class="outline-box margin-bottom-xxxs">
+                        <div>
+                            <p class="margin-none label-text-medium weight-600 color-text-title">Conta corrente</p>
+                            <p id="cashInBankAccountText" class="margin-none body-text-medium weight-400 color-primary">Kamino</p>
+                        </div>
+                        <div>
+                            <p class="margin-none label-text-medium weight-600 color-text-title">Saldo</p>
+                            <p id="cashInBankAccountBalanceText" class="margin-none body-text-medium weight-400 color-primary"></p>
+                        </div>
+                    </div>
+                </div>
+                <label class="label-text-medium weight-600 color-text-title margin-bottom-quark">Valor da transferência</label>
+                <div>
+                    <input type="text" id="balanceCashInInput" required class="form-control cash-input" placeholder="Informe o valor"/>
+                </div>
+            </div>
+            <div class="modal-footer cash-modal-footer">
+                <button id="cashInCancelButton" type="button" class="btn btn-everest-default-txt margin-none" style="margin-right: 8px !important;" data-dismiss="modal">Cancelar</button>
+                <button id="transferNowButton" type="submit" class="btn btn-success margin-none" value="Transferir agora" disabled="disabled">
+                    Transferir agora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="modalCashOut" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog cash-modal-dialog">
+        <div class="modal-content cash-out-modal-content">
+            <div class="modal-header cash-modal-header">
+                <button id="closeModalCashOut" type="button" class="close" data-dismiss="modal">
+                    <i class="fa-solid fa-xmark-large"></i>
+                </button>
+                <h4 class="modal-title">Solicitar resgate</h4>
+            </div>
+            <div class="modal-body cash-modal-body">
+                <p class="color-neutral-a body-text-medium weight-400 margin-bottom-xxxs">Só é possível solicitar resgate para contas da mesma titularidade.</p>
+                <div>
+                    <div class="outline-box margin-bottom-xxxs">
+                        <div>
+                            <p class="margin-none label-text-medium weight-600 color-text-title">Conta corrente</p>
+                            <p id="cashOutBankAccountText" class="margin-none body-text-medium weight-400 color-primary">Kamino</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="cash-out-inputs-container margin-bottom-xxxs">
+                    <div>
+                        <label class="label-text-medium color-neutral-a weight-600 margin-bottom-quark">Saldo disponível</label>
+                        <div>
+                            <input readonly="readonly" type="text" id="cashOutBankAccountBalanceInput" class="form-control cash-input" placeholder="R$"/>
+                        </div>
+                    </div>
+                    <div class="arrow-right-container">
+                        <i class="fa-regular fa-arrow-right" style="font-size: 16px; color:  #001E35"></i>
+                    </div>
+                    <div>
+                        <label class="label-text-medium color-neutral-a weight-600 margin-bottom-quark">Valor do resgate</label>
+                        <div>
+                            <input id="balanceCashOutInput" type="text" required class="form-control cash-input" placeholder="R$"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-container">
+                    <i class="fa-regular fa-circle-exclamation margin-all-quark" style="color: #808E9A; font-size: 16px"></i>
+                    <p class="body-text-small color-neutral-a margin-none">O valor resgatado estará disponível na conta informada no próximo dia útil.</p>
+
+                </div>
+            </div>
+            <div class="modal-footer cash-modal-footer">
+                <button id="cashOutCancelButton" type="button" class="btn btn-everest-default-txt margin-none" style="margin-right: 8px !important;" data-dismiss="modal">Cancelar</button>
+                <button id="recoverBalanceButton" type="submit" class="btn btn-success margin-none" value="Confirmar resgate" disabled="disabled">
+                    Confirmar resgate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="modalCashInOutFeedback">
+    <div class="modal-dialog cash-modal-dialog">
+        <div class="modal-content cash-modal-feedback-content">
+            <div class="modal-header cash-modal-header">
+                <button id="closeModalFeedback" type="button" class="close" data-dismiss="modal">
+                    <i class="fa-solid fa-xmark-large"></i>
+                </button>
+            </div>
+            <div class="modal-body cash-modal-body">
+                <div class="feedback-icon-container">
+                    <i id="feedbackIcon" class="fa-light fa-circle-check color-success margin-bottom-xxxs" style="font-size: 64px"></i>
+                </div>
+                <p id="feedbackTitle" class="feedback-modal-text margin-bottom-xxxs text-align-center">Solicitação realizada com sucesso!</p>
+                <p id="feedbackText" class="body-text-medium color-neutral-b text-align-center">A transferência está sendo processada e logo estará disponível na conta de destino.</p>
+            </div>
+            <div class="modal-footer cash-modal-footer">
+                <button id="feedbackBackButton" type="button" class="btn btn-everest-default-txt margin-none" style="margin-right: 8px !important;">Fechar</button>
+                <button id="feedbackCancelButton" type="button" class="btn btn-success margin-none" data-dismiss="modal">
+                    Visualizar conta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/x-handlebars-template" id="consultaTemplate">
+        {{#each this}}
+        <tr style="font-weight: 600">
+            <td>{{formataData Data}}</td>
+            <td colspan="2">Saldo inicial</td>
+            <td class="text-right {{#if PositivoInicial}}blue{{else}}red{{/if}}">{{formataDecimal SaldoInicial 2}}</td>
+            <td></td>
+            <td></td>
+        </tr>
+        {{#each lanc}}
+        <tr>
+            <td></td>
+            <td>{{Classificacao}}</td>
+            <td>{{#if Link}}<a href="{{Link}}">{{Descricao}}</a>{{else}}{{Descricao}}{{/if}}{{#unless RateioPagamento}}{{#unless RateioRecebimento}}<span class="smallText"><br />{{NomePessoa}}</span>{{/unless}}{{/unless}}</td>
+            <td class="text-right {{#if Positivo}}blue{{else}}red{{/if}}">{{formataDecimal ValorRealizado 2}}</td>
+            {{#if ConciliadoPagamento}}
+            <td class="green" title="Este lançamento já foi conciliado"><i class="fa fa-usd"></i></td>
+            {{else if ConciliadoRecebimento}}
+            <td class="green" title="Este lançamento já foi conciliado"><i class="fa fa-usd"></i></td>
+            {{else if ConciliadoMovimentacaoContaDestino}}
+            <td class="green" title="Este lançamento já foi conciliado"><i class="fa fa-usd"></i></td>
+            {{else if ConciliadoMovimentacaoContaOrigem}}
+            <td class="green" title="Este lançamento já foi conciliado"><i class="fa fa-usd"></i></td>
+            {{else}}
+            <td class="inativo" title="Este lançamento ainda não foi conciliado"><i class="fa fa-usd"></i></td>
+            {{/if}}
+            <td class="text-center">{{#if Link}}<a href="{{Link}}"><i class="fa fa-folder-open-o"></i></a>{{/if}}</td>
+        </tr>
+        {{#if RateioPagamento}}
+        <tr>
+            <td></td>
+            <td colspan="3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Pessoa</th>
+                            <th>Centro de Custo</th>
+                            <th>Classificação</th>
+                            <th>Valor (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each RateioPagamento}}
+                        <tr>
+                            <td data-entidade="Pessoa" data-id="{{IDPessoa}}">{{NomePessoa}}</td>
+                            <td>{{NomeCentroCusto}}</td>
+                            <td>{{NomePlanoConta}}</td>
+                            <td>{{formataDecimal Perc 1 true false}}% - R$ {{formataDecimal Valor 2}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </td>
+            <td></td>
+        </tr>
+        {{/if}}
+        {{#if RateioRecebimento}}
+        <tr>
+            <td></td>
+            <td colspan="3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Pessoa</th>
+                            <th>Centro de Custo</th>
+                            <th>Classificação</th>
+                            <th>Valor (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each RateioRecebimento}}
+                        <tr>
+                            <td data-entidade="Pessoa" data-id="{{IDPessoa}}">{{NomePessoa}}</td>
+                            <td>{{NomeCentroCusto}}</td>
+                            <td>{{NomePlanoConta}}</td>
+                            <td>{{formataDecimal Perc 1 true false}}% - R$ {{formataDecimal Valor 2}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </td>
+            <td></td>
+        </tr>
+        {{/if}}
+        {{/each}}
+        {{#if @@last}}
+        <tr style="font-weight: 600">
+            <td>{{formataData Data}}</td>
+            <td colspan="2">Saldo final</td>
+            <td id="saldoFinal" class="text-right {{#if PositivoFinal}}blue{{else}}red{{/if}}">{{formataDecimal SaldoFinal 2}}</td>
+            <td></td>
+            <td></td>
+        </tr>
+        {{#ifCond DataJson DataHoje}}
+        {{#if ContaGarantia}}
+        <tr style="font-weight: 300">
+            <td></td>
+            <td colspan="2">Em processo de resgate (D+1)</td>
+            <td class="text-right" title="Valores referentes às solicitações de retiradas em processamento.">{{formataDecimal SaldoBloqueado 2}}</td>
+            <td></td>
+            <td></td>
+        </tr>
+        {{else}}
+        <tr style="font-weight: 300">
+            <td></td>
+            <td colspan="2">Em processo de resgate (D+1)</td>
+            <td class="text-right" title="Clique para ver os detalhes do saldo bloqueado"><a href="#" class="linkEntidade red" onclick="abreDrillDownDetalheSaldoBloqueado({{IDContaBanco}}); return false;">{{formataDecimal SaldoBloqueado 2}}</a></td>
+            <td></td>
+            <td></td>
+        </tr>
+        {{/if}}
+        <tr style="font-weight: 500">
+            <td></td>
+            <td colspan="2">Saldo disponível</td>
+            <td class="text-right {{#if PositivoDisponivel}}blue{{else}}red{{/if}}">{{formataDecimal SaldoDisponivel 2}}</td>
+            <td></td>
+            <td></td>
+        </tr>
+        {{/ifCond}}
+        {{/if}}
+        {{/each}}
+    </script>
+    <script src="~/Scripts/Views/Financeiro/VerConta.js?v=@Common.CurrentVersion" type="text/javascript"></script>
+    <script src="~/Scripts/Utils/ContaCorrenteUtils.js?v=@Common.CurrentVersion"></script>
+    <script src="~/Scripts/Views/Financeiro/ImportacaoTransferencia.js?v=@Common.CurrentVersion"></script>
+    <script type="text/javascript">
+        var Filtros = {
+            ApenasRealizados: true,
+            PeriodoDe: moment().startOf('week').startOf('day').toJSON(),
+            PeriodoAte: moment().endOf('week').startOf('day').toJSON(),
+            IDPlanoContaAtivo: "@ViewBag.IDConta"
+        };
+        var Reprocessar = Boolean(@ViewBag.reprocessar);
+    </script>
+}
